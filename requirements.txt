@@ -1,0 +1,6 @@
+numpy      >= 1.19.4     # linear algebra module
+scipy      >= 1.5.4      # FFT module 
+psutil     >= 5.7.3      # monitor RAM usage
+h5py       >= 3.1.0      # I/O data
+matplotlib >= 3.3.3      # postprocess for figs
+imageio    >= 2.4.1      # postprocess for animations
