@@ -1,5 +1,5 @@
 """
-Application of SPOD to jet 2D slice data by LES.
+Application of SPOD to compressor blade surface blade data by DDES.
 Details of the data can be found in the following:
     
   He, X., Zhao, F., & Vahdati, M. (2021). Detached Eddy Simulation: Recent 
