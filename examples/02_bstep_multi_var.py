@@ -7,7 +7,7 @@ Details of the data can be found in the following:
   No. GT2021-59077.
 
 Xiao He (xiao.he2014@imperial.ac.uk)
-Last update: 27-Dec-2020
+Last update: 15-Apr-2021
 """
 
 # -------------------------------------------------------------------------
@@ -119,7 +119,7 @@ print('--------------------------------------'    )
 start_sec2 = time.time()
 
 # main function
-[L,P,f] = spod.spod(data, dt, weight)
+spod.spod(data, dt, save_path, weight, method='fast')
 
 # Sec. 2 end time
 end_sec2 = time.time()
@@ -129,27 +129,26 @@ print('SPOD main calculation finished!'           )
 print('Time lapsed: %.2f s'%(end_sec2-start_sec2) )
 print('--------------------------------------'    )
 
-#%%      
+   
 # -------------------------------------------------------------------------
-# 3. Save SPOD result
-# function spod.save_results('str',L,P,f)
+# 3. Read SPOD result
 # -------------------------------------------------------------------------
 
 # Sec. 3 start time
 start_sec3 = time.time()
 
-# save function
-if save_result:
-    spod.save_results(save_path,L,P,f)
-    save_print = 'SPOD results saved!' 
-else:
-    save_print = 'SPOD results saving skipped'
+# load data from h5 format
+SPOD_LPf  = h5py.File(os.path.join(save_path,'SPOD_LPf.h5'),'r')
+L = SPOD_LPf['L'][:,:]    # modal energy E(f, M)
+P = SPOD_LPf['P'][:,:,:]  # mode shape
+f = SPOD_LPf['f'][:]      # frequency
+SPOD_LPf.close()
 
 # Sec. 3 end time
 end_sec3 = time.time()
 
 print('--------------------------------------'    )
-print( save_print                                 )
+print('SPOD results read in!'                     )
 print('Time lapsed: %.2f s'%(end_sec3-start_sec3) )
 print('--------------------------------------'    )
 
@@ -287,7 +286,6 @@ var_levels = [np.arange(-300,330,30),
               np.arange(-30,33,3),
               np.arange(-1,1.1,0.1)]
 plot_vars  = [0,1,2,3]   # vars to be plotted; 0-3: p, u, v, T
-
 data_mean  = np.mean(data,axis=0) # time-averaged data
 
 # loop over each var
@@ -340,14 +338,13 @@ print('Plot original flow field finished')
 t_start = 0
 t_end   = np.int(nt/10)
 t_delta = 1
-ts      = dt*np.arange(t_start,t_end,t_delta)
 
 # modes and frequencies used for reconstruction
 Ms = np.arange(0,L.shape[1])
 fs = np.arange(0,f.shape[0])
 
 # reconstruction function
-data_rec = spod.reconstruct(f,L,P,Ms,fs,ts)
+data_rec = spod.reconstruct_time_method(data-data_mean,dt,f,L,P,Ms,fs,weight=weight)
 
 # plot animation of reconstructed flow field
 if save_fig:
@@ -357,12 +354,12 @@ if save_fig:
         var_level = var_levels[vari]
         var_unit  = var_units[vari]
         
-        bstep_contour_anim(0, ts.shape[0], 1, dt*t_delta,
+        bstep_contour_anim(t_start, t_end, t_delta, dt,
                            ani_save_name='rec_'+str(var_name)+'_anim.gif', 
                            q=data_rec[:,np.int(vari*ng):np.int((vari+1)*ng)], 
                            qlevels=var_level, 
                            qname='$'+str(var_name)+'$'+r'$-\bar{'+str(var_name)+'} $ ('+str(var_unit)+')', 
-                           x=grid[:,0], y=grid[:,1], colormap=cm.coolwarm)
+                           x=grid[:,0], y=grid[:,1], colormap=cm.coolwarm)       
 
 print('Plot reconstructed flow field finished')
 

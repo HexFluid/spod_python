@@ -67,7 +67,7 @@ For more detailed postprocess examples including plotting mode shapes and flow f
 
 
 ## Memory Usage
-SPOD is a memory-demanding algorithm. Before running it on your own case, please check if the memory requirement has been met. The table below helps estimate the memory usage of new cases. All data are obtained by running *spod.spod* in default mode.
+SPOD is a memory-demanding algorithm. Before running it on your own case, please check if the memory requirement has been met. The table below helps estimate the memory usage of new cases. All data are obtained by running *spod.spod* in 'fast' mode.
 
 | Case | Snapshot count | Data count / snapshot | Memory usage | CPU time |
 | :--: | :------------: | :-------------------: | :----------: | :------: |
