@@ -35,7 +35,7 @@ Run the following script with Python 3 to load the data:
 import h5py
 import os
 
-current_path = os.getcwd() # assuming Python lauched in the 'spod_python' dir
+current_path = os.getcwd() # assuming Python launched in the 'spod_python' dir
 data_path    = os.path.join(current_path,'examples','bstep_data','bstepDDES.h5')
 
 h5f  = h5py.File(data_path,'r')
@@ -49,7 +49,13 @@ Run the following script to obtain SPOD results:
 ```python
 import spod
 
-[L,P,f] = spod.spod(data,dt,weight='default',nOvlp='default',window='default')
+spod.spod(data,dt,current_path,weight='default',nOvlp='default',window='default',method='fast')
+
+SPOD_LPf  = h5py.File(os.path.join(current_path,'SPOD_LPf.h5'),'r') # load data from h5 format
+L = SPOD_LPf['L'][:,:]    # modal energy E(f, M)
+P = SPOD_LPf['P'][:,:,:]  # mode shape
+f = SPOD_LPf['f'][:]      # frequency
+SPOD_LPf.close()
 ```
 
 ### Step 5: Postprocess

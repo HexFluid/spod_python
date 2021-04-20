@@ -16,7 +16,7 @@ Last update: 15-April-2021
 # -------------------------------------------------------------------------
 # import libraries
 import numpy as np
-from scipy.fftpack import fft
+from scipy.fft import fft
 import time
 import os
 import psutil
@@ -85,7 +85,7 @@ def spod(x,dt,save_path,weight='default',nOvlp='default',nDFT='default',window='
     print('--------------------------------------')
  
     # calculate time-averaged result
-    x_mean  = np.mean(x,0)
+    x_mean  = np.mean(x,axis=0)
 
     # obtain frequency axis
     f     = np.arange(0,int(np.ceil(nDFT/2)+1))
@@ -120,7 +120,7 @@ def spod(x,dt,save_path,weight='default',nOvlp='default',nDFT='default',window='
         
         # Fourier transform on block
         Q_blk_hat = 1/np.mean(window)/nDFT*fft(Q_blk)
-        Q_blk_hat = Q_blk_hat[:,0:nFreq] 
+        Q_blk_hat = Q_blk_hat[:,0:nFreq]
         
         # correct Fourier coefficients for one-sided spectrum
         Q_blk_hat[:,1:(nFreq-1)] *= 2
