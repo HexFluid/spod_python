@@ -1,0 +1,11 @@
+﻿ID,Case,Nt,Nq,Memory_fast,Memory_lowRAM
+1,Backstep,800,3580,0.23,0.14
+2,Cooling,600,14588,0.38,0.18
+3,Compressor,1701,7086,0.51,0.17
+4,Backstep,800,14320,0.55,0.22
+5,Jet,2500,6825,0.76,0.26
+6,Compressor,4251,36377,5.35,0.69
+7,Compressor,1701,481493,27.48,3.39
+8,Compressor,4251,481493,68.93,8.09
+9,Compressor,1701,2407465,136.87,16.51
+10,Compressor,4251,2407465,344.24,40.03
