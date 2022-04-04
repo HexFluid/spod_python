@@ -17,6 +17,7 @@ Last update: 24-Sep-2021
 # import libraries
 import numpy as np
 from scipy.fft import fft, ifft
+from scipy.special import gammaincinv
 import time
 import os
 import psutil
@@ -709,5 +710,64 @@ def plot_spectrum(f,L,hl_idx=5):
     plt.legend(loc='best')
     
     return fig
+
+def plot_confidence_bounds(nBlks, conf_level = 0.95):
+    '''
+    Purpose: plot confidence bounds of SPOD energy
+             i.e., lambda_lower/lambda and lambda_upper/lambda
+             (Schmidt, O., and Colonius, T., 2020, AIAA J, 58(3), 1023-1033)
+    
+    Parameters
+    ----------
+    nBlks  : int; calculated/specified number of blocks; also number of modes, i.e., L.shape[1]
+         
+    Returns
+    -------
+    lambda_lower: float; lower bound of energy (relative)
+    lambda_upper: float; upper bound of energy (relative)
+    fig1 : matplotlib figure object; plot upper and lower bounds
+    fig2 : matplotlib figure object; plot difference between upper and lower bounds
+    '''
+
+    # calculate bounds for all nBlks
+    Nbs = np.linspace(5,100,20)
+    xi2_uppers    = 2 * gammaincinv(Nbs, 1 - conf_level)
+    xi2_lowers    = 2 * gammaincinv(Nbs, conf_level)
+    lambda_uppers = 2 * Nbs/xi2_uppers
+    lambda_lowers = 2 * Nbs/xi2_lowers
+    lambda_intervals = lambda_uppers-lambda_lowers
+    
+    # calculate bounds for the input nBlk
+    lambda_upper = nBlks/gammaincinv(nBlks, 1 - conf_level)
+    lambda_lower = nBlks/gammaincinv(nBlks, conf_level)  
+    lambda_interval = lambda_upper-lambda_lower
+    
+    # plot upper and lower bounds
+    fig1 = plt.figure()
+    plt.loglog(Nbs, lambda_lowers, linestyle='-', color='lightgrey', label='Lower bound')
+    plt.loglog(Nbs, lambda_uppers, linestyle='--', color='lightgrey',label='Upper bound')
+    plt.scatter([nBlks,nBlks],[lambda_upper,lambda_lower], 
+                facecolor='white', edgecolor='steelblue', label='Input $n_{Blks}$',zorder=3)
+    plt.text(nBlks*1.1, lambda_upper*1.1, '(%.i, %.4f)'%(nBlks,lambda_upper))
+    plt.text(nBlks*1.1, lambda_lower*0.7, '(%.i, %.4f)'%(nBlks,lambda_lower))    
+
+    plt.xlabel('Number of modes')
+    plt.ylabel('Normalized confidence bounds')
+    plt.legend(loc='best')
+    plt.axis([5,100,0.1,10])
+    
+    # plot difference between upper and lower bounds
+    fig2 = plt.figure()
+    plt.loglog(Nbs, lambda_intervals, color='lightgrey',label='confidence interval')
+    plt.scatter(nBlks,lambda_interval, facecolor='white', edgecolor='steelblue',
+                label='Input $n_{Blks}$',zorder=3)
+    plt.text(nBlks*1.1, lambda_interval*1.1, '(%.i, %.4f)'%(nBlks,lambda_interval))
+
+    plt.xlabel('Number of modes')
+    plt.ylabel('Normalized confidence interval')
+    plt.legend(loc='best')
+    plt.axis([5,100,0.1,2])
+    
+    return lambda_lower, lambda_upper, fig1, fig2
 
 # End

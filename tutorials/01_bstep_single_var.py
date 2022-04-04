@@ -50,7 +50,7 @@ start_sec1 = time.time()
 data_path = os.path.join(current_path, 'bstep_data')
 
 # option to save SPOD results
-save_fig  = True  # postprocess figs
+save_fig  = False  # postprocess figs
 save_path = data_path
 
 # load data from h5 format
