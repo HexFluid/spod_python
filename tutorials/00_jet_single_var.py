@@ -58,10 +58,10 @@ h5f  = h5py.File(os.path.join(data_path,'jetLES.h5'),'r')
 data = h5f['data'][:]        # flow fields
 grid = h5f['grid'][:]        # grid points
 dt   = h5f['dt'][0]          # unit in seconds
-ng   = np.int(grid.shape[0]) # number of grid point
+ng   = int(grid.shape[0]) # number of grid point
 nt   = data.shape[0]         # number of snap shot
 nx   = data.shape[1]         # number of grid point * number of variable
-nvar = np.int(nx/ng)         # number of variables
+nvar = int(nx/ng)         # number of variables
 h5f.close()
 
 # calculate weight
@@ -258,7 +258,7 @@ for i in range(len(plot_snapshot)):
 
 # plot animation of flow field
 t_start = 0
-t_end   = np.int(nt/10)
+t_end   = int(nt/10)
 t_delta = 1
 
 if save_fig:
@@ -268,27 +268,31 @@ if save_fig:
                        colormap=cm.coolwarm)
 
 print('Plot original flow field finished')
-
+#%%
 # -------------------------------------------------------------------------
 ### 4.4 Reconstructed flow field
 # time series to be reconstructed
 t_start = 0
-t_end   = np.int(nt/10)
+t_end   = int(nt/10)
 t_delta = 1
 
 # modes and frequencies used for reconstruction
 Ms = np.arange(0,L.shape[1])
 fs = np.arange(0,f.shape[0])
 
+Ms = np.arange(0,3)
+fs = np.arange(0,2)
+
 # plot animation of reconstructed flow field
 if save_fig:
     # reconstruction function
-    data_rec = spod.reconstruct_time_method(data-data_mean,dt,f,P,Ms,fs,weight=weight)
-    jet_contour_anim(t_start, t_end, t_delta, dt,
-                     ani_save_name='rec_p_anim.gif',
-                     q=data_rec, qlevels=np.arange(-0.04,0.044,0.004),
-                     qname=r'$p-\bar{p} $ (Pa)', x=grid[:,0], y=grid[:,1],
-                     colormap=cm.coolwarm)
+    data_rec = spod.reconstruct_time_method(data-data_mean,dt,f,P,Ms,fs,weight=weight,
+                                            method='lowRAM',save_path=save_path)
+    # jet_contour_anim(t_start, t_end, t_delta, dt,
+    #                  ani_save_name='rec_p_anim.gif',
+    #                  q=data_rec, qlevels=np.arange(-0.04,0.044,0.004),
+    #                  qname=r'$p-\bar{p} $ (Pa)', x=grid[:,0], y=grid[:,1],
+    #                  colormap=cm.coolwarm)
 
 print('Plot reconstructed flow field finished')
 

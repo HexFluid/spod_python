@@ -58,10 +58,10 @@ h5f  = h5py.File(os.path.join(data_path,'bstepDDES.h5'),'r')
 data = h5f['data'][:]        # flow fields
 grid = h5f['grid'][:]        # grid points
 dt   = h5f['dt'][0]          # unit in seconds
-ng   = np.int(grid.shape[0]) # number of grid point
+ng   = int(grid.shape[0]) # number of grid point
 nt   = data.shape[0]         # number of snap shot
 nx   = data.shape[1]         # number of grid point * number of variable
-nvar = np.int(nx/ng)         # number of variables
+nvar = int(nx/ng)         # number of variables
 h5f.close()
 
 # calculate grid weight
@@ -271,7 +271,7 @@ for vari in plot_vars:
         fi = plot_modes[i][1]
         
         fig = plt.figure(figsize=(6,4))
-        fig = bstep_contour(np.real(P[fi, np.int(vari*ng):np.int((vari+1)*ng), Mi]), 
+        fig = bstep_contour(np.real(P[fi, int(vari*ng):int((vari+1)*ng), Mi]), 
                             var_level, r'$\phi_'+var_name+'$', grid[:,0], grid[:,1])
         plt.text(-1.7,-0.35,'Mode '+str(Mi+1)+', f = %.2f Hz'%(f[fi]), fontsize=14)
         
@@ -307,8 +307,8 @@ for vari in plot_vars:
         ti = plot_snapshot[i]
         
         fig = plt.figure(figsize=(6,4))
-        fig = bstep_contour(data[ti,np.int(vari*ng):np.int((vari+1)*ng)]-
-                                 data_mean[np.int(vari*ng):np.int((vari+1)*ng)], var_level, 
+        fig = bstep_contour(data[ti,int(vari*ng):int((vari+1)*ng)]-
+                                 data_mean[int(vari*ng):int((vari+1)*ng)], var_level, 
                             '$'+str(var_name)+'$'+r'$-\bar{'+str(var_name)+'} $ ('+str(var_unit)+')', 
                             grid[:,0], grid[:,1])
         plt.text(-1.7,-0.35,'t = %.4f s'%(ti*dt), fontsize=14)
@@ -320,7 +320,7 @@ for vari in plot_vars:
 
 # plot animation of flow field
 t_start = 0
-t_end   = np.int(nt/10)
+t_end   = int(nt/10)
 t_delta = 1
 
 if save_fig:
@@ -331,7 +331,7 @@ if save_fig:
         var_unit  = var_units[vari]
     
         bstep_contour_anim(t_start, t_end, t_delta, dt, ani_save_name='ori_'+str(var_name)+'_anim.gif', 
-                           q=(data-data_mean)[:,np.int(vari*ng):np.int((vari+1)*ng)],
+                           q=(data-data_mean)[:,int(vari*ng):int((vari+1)*ng)],
                            qlevels=var_level, 
                            qname='$'+str(var_name)+'$'+r'$-\bar{'+str(var_name)+'} $ ('+str(var_unit)+')', 
                            x=grid[:,0], y=grid[:,1], colormap=cm.coolwarm)   
@@ -342,7 +342,7 @@ print('Plot original flow field finished')
 ### 4.4 Reconstructed flow field
 # time series to be reconstructed
 t_start = 0
-t_end   = np.int(nt/10)
+t_end   = int(nt/10)
 t_delta = 1
 
 # modes and frequencies used for reconstruction
@@ -362,7 +362,7 @@ if save_fig:
         
         bstep_contour_anim(t_start, t_end, t_delta, dt,
                            ani_save_name='rec_'+str(var_name)+'_anim.gif', 
-                           q=data_rec[:,np.int(vari*ng):np.int((vari+1)*ng)], 
+                           q=data_rec[:,int(vari*ng):int((vari+1)*ng)], 
                            qlevels=var_level, 
                            qname='$'+str(var_name)+'$'+r'$-\bar{'+str(var_name)+'} $ ('+str(var_unit)+')', 
                            x=grid[:,0], y=grid[:,1], colormap=cm.coolwarm)       

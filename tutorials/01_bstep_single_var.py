@@ -57,11 +57,11 @@ save_path = data_path
 h5f  = h5py.File(os.path.join(data_path,'bstepDDES.h5'),'r')
 grid = h5f['grid'][:]        # grid points
 dt   = h5f['dt'][0]          # unit in seconds
-ng   = np.int(grid.shape[0]) # number of grid point
+ng   = int(grid.shape[0]) # number of grid point
 data = h5f['data'][:,0:ng]   # only p is loaded to RAM
 nt   = data.shape[0]         # number of snap shot
 nx   = data.shape[1]         # number of grid point * number of variable
-nvar = np.int(nx/ng)         # number of variables
+nvar = int(nx/ng)         # number of variables
 h5f.close()
 
 # calculate weight
@@ -262,7 +262,7 @@ for i in range(len(plot_snapshot)):
 
 # plot animation of flow field
 t_start = 0
-t_end   = np.int(nt/10)
+t_end   = int(nt/10)
 t_delta = 1
 
 if save_fig:
@@ -277,7 +277,7 @@ print('Plot original flow field finished')
 ### 4.4 Reconstructed flow field
 # time series to be reconstructed
 t_start = 0
-t_end   = np.int(nt/10)
+t_end   = int(nt/10)
 t_delta = 1
 
 # modes and frequencies used for reconstruction

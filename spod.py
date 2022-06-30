@@ -81,6 +81,7 @@ def spod(x,dt,save_path,weight='default',nOvlp='default',nDFT='default',window='
     # 2. loop over number of blocks and generate Fourier 
     #    realizations (DFT)
     #---------------------------------------------------------
+    print('--------------------------------------')
     print('Calculating temporal DFT'              )
     print('--------------------------------------')
  
@@ -285,14 +286,14 @@ def spod_parser(nt, nx, window, weight, nOvlp, nDFT, method):
         # default window with specified/default nDFT
         try:
             # user specified nDFT
-            nDFT  = np.int(nDFT)
-            nDFT  = np.int(2**(np.floor(np.log2(nDFT)))) # round-up to 2**n type int
+            nDFT  = int(nDFT)
+            nDFT  = int(2**(np.floor(np.log2(nDFT)))) # round-up to 2**n type int
             print('Using user specified nDFT ...')             
                 
         except:
             # default nDFT
             nDFT  = 2**(np.floor(np.log2(nt/10))) #!!! why /10 is recommended?
-            nDFT  = np.int(nDFT)
+            nDFT  = int(nDFT)
             print('Using default nDFT...')
             
         window   = hammwin(nDFT)
@@ -302,7 +303,7 @@ def spod_parser(nt, nx, window, weight, nOvlp, nDFT, method):
     # calculate or specify nOvlp
     try:
         # user specified nOvlp
-        nOvlp = np.int(nOvlp)
+        nOvlp = int(nOvlp)
         
         # test feasibility
         if nOvlp > nDFT-1:
@@ -313,12 +314,12 @@ def spod_parser(nt, nx, window, weight, nOvlp, nDFT, method):
             
     except:            
         # default nOvlp
-        nOvlp = np.int(np.floor(nDFT/2))
+        nOvlp = int(np.floor(nDFT/2))
         print('Using default nOvlp...')
 
 
     # calculate nBlks from nOvlp and nDFT    
-    nBlks = np.int(np.floor((nt-nOvlp)/(nDFT-nOvlp)))
+    nBlks = int(np.floor((nt-nOvlp)/(nDFT-nOvlp)))
  
     # test feasibility
     if (nDFT < 4) or (nBlks < 2):
@@ -393,7 +394,66 @@ def reconstruct_direct(f,L,P,Ms,fs,ts):
                 
     return data_rec
 
-def reconstruct_time_method(x,dt,f,P,Ms,fs,weight='default'):
+# def reconstruct_time_method(x,dt,f,P,Ms,fs,weight='default'): # backup
+#     '''
+#     Purpose: reconstruct flow field using the time domain method 
+#              (Nekkanti, A. and Schmidt, O., 2021, JFM, 926)
+    
+#     Parameters
+#     ----------
+#     x  : 2D numpy array, float; space-time flow field data (mean=0).
+#          nrow = number of time snapshots;
+#          ncol = number of grid point * number of variable
+#     dt : float; time step between adjacent snapshots
+#     f  : 1D numpy array, float; frequency; output of SPOD main function
+#     P  : 3D numpy array, complex; mode shape; output of SPOD main function
+#          shape[0] = number of frequencies;
+#          shape[1] = number of grid point * number of variable
+#          shape[2] = number of modes(ranked in descending order by modal energy)              
+#     Ms : 1D numpy array, int; index of modes used for reconstruction
+#     fs : 1D numpy array, int; index of frequencies used for reconstruction
+#     weight : 1D numpy array; weight function (default unity)
+#              n = number of grid point * number of variable
+             
+#     Returns
+#     -------
+#     data_rec : 1D numpy array; reconstructed flow field data
+#     '''
+
+#     # initialize reconstructed flow field data
+#     nt = x.shape[0]
+#     nx = x.shape[1]
+#     data_rec = np.zeros((nt,nx))
+
+#     # SPOD parser
+#     [weight, _, _, _, _] = spod_parser(nt, nx, window='default', \
+#              weight=weight, nOvlp='default',nDFT='default', method='lowRAM')
+
+#     # calculate phi_tilda
+#     phi_tilda = np.zeros((nx,Ms.shape[0]*fs.shape[0]), dtype=complex)   
+#     for i in range(nx):
+#         phi_tilda[i,:] = np.ravel(P[:,i,:][fs,:][:,Ms], order='C')
+    
+#     # calculate approximated phi_inv
+#     [D, U] = np.linalg.eig(np.dot(np.conjugate(phi_tilda).T * weight, phi_tilda)) # eigen-decomposition
+#     D_inv = np.identity(D.shape[0], dtype=complex)
+#     eps=1e-2 # limiter: truncated eigenvalue / max eigenvalue
+#     for i in range(D.shape[0]):
+#         if np.abs(D[i]) < eps*np.max(np.abs(D)):
+#             D_inv[i,i] = 0
+#         else:
+#             D_inv[i,i] = 1/D[i]
+#     phi_inv = np.dot(np.dot(U, D_inv), np.conjugate(U).T)
+
+#     # calculate A_tilda
+#     A_tilda = np.dot(np.dot(phi_inv, np.conjugate(phi_tilda).T)*weight, x.T)
+   
+#     # calculate data_rec
+#     data_rec = np.real(np.dot(phi_tilda, A_tilda).T)
+                
+#     return data_rec
+
+def reconstruct_time_method(x,dt,f,P,Ms,fs,weight='default',save_path=os.getcwd(),method='lowRAM'):
     '''
     Purpose: reconstruct flow field using the time domain method 
              (Nekkanti, A. and Schmidt, O., 2021, JFM, 926)
@@ -419,6 +479,12 @@ def reconstruct_time_method(x,dt,f,P,Ms,fs,weight='default'):
     data_rec : 1D numpy array; reconstructed flow field data
     '''
 
+    time_start=time.time()
+
+    print('--------------------------------------')
+    print('Time-method reconstruction ...'        )
+    print('--------------------------------------')
+    
     # initialize reconstructed flow field data
     nt = x.shape[0]
     nx = x.shape[1]
@@ -426,15 +492,32 @@ def reconstruct_time_method(x,dt,f,P,Ms,fs,weight='default'):
 
     # SPOD parser
     [weight, _, _, _, _] = spod_parser(nt, nx, window='default', \
-             weight=weight, nOvlp='default',nDFT='default', method='lowRAM')
+             weight=weight, nOvlp='default',nDFT='default', method=method)
 
     # calculate phi_tilda
-    phi_tilda = np.zeros((nx,Ms.shape[0]*fs.shape[0]), dtype=complex)   
-    for i in range(nx):
-        phi_tilda[i,:] = np.ravel(P[:,i,:][fs,:][:,Ms], order='C')
+    if method == 'fast':
+        phi_tilda = np.zeros((nx,Ms.shape[0]*fs.shape[0]), dtype=complex)
+        for i in range(nx):
+            phi_tilda[i,:] = np.ravel(P[:,i,:][fs,:][:,Ms], order='C')
+        
+    elif method == 'lowRAM':
+        h5f = h5py.File(os.path.join(save_path,'reconstruct.h5'), 'w')
+        h5f.create_dataset('phi_tilda', shape=(nx,Ms.shape[0]*fs.shape[0]), 
+                            chunks=True, dtype = complex, compression="gzip")
+        for i in range(nx):
+            h5f['phi_tilda'][i,:] = np.ravel(P[:,i,:][fs,:][:,Ms], order='C')
+    
+    print('Calculate phi_tilda finished ...')
+    
+    process   = psutil.Process(os.getpid())
+    RAM_usage = process.memory_info().rss/1024**3 # unit in GBs
+    print('Memory usage: %.2f GB'%RAM_usage            )       
     
     # calculate approximated phi_inv
-    [D, U] = np.linalg.eig(np.dot(np.conjugate(phi_tilda).T * weight, phi_tilda)) # eigen-decomposition
+    if method == 'fast':
+        [D, U] = np.linalg.eig(np.dot(np.conjugate(phi_tilda).T * weight, phi_tilda)) # eigen-decomposition
+    elif method == 'lowRAM':
+        [D, U] = np.linalg.eig(np.dot(np.conjugate(h5f['phi_tilda']).T * weight, h5f['phi_tilda'])) # eigen-decomposition
     D_inv = np.identity(D.shape[0], dtype=complex)
     eps=1e-2 # limiter: truncated eigenvalue / max eigenvalue
     for i in range(D.shape[0]):
@@ -443,12 +526,49 @@ def reconstruct_time_method(x,dt,f,P,Ms,fs,weight='default'):
         else:
             D_inv[i,i] = 1/D[i]
     phi_inv = np.dot(np.dot(U, D_inv), np.conjugate(U).T)
+    print(phi_inv.shape)
+    del D_inv, D, U
+
+    print('Calculate phi_inv finished ...')
+    
+    # process   = psutil.Process(os.getpid())
+    # RAM_usage = process.memory_info().rss/1024**3 # unit in GBs
+    # print('Memory usage: %.2f GB'%RAM_usage            )   
+
 
     # calculate A_tilda
-    A_tilda = np.dot(np.dot(phi_inv, np.conjugate(phi_tilda).T)*weight, x.T)
-   
+    if method == 'fast':    
+        A_tilda = np.dot(np.dot(phi_inv, np.conjugate(phi_tilda).T)*weight, x.T)
+    elif method == 'lowRAM':
+        A_tilda = np.dot(np.dot(phi_inv, np.conjugate(h5f['phi_tilda']).T)*weight, x.T)
+    print(A_tilda.shape)
+    del phi_inv
+    print('Calculate A_tilda finished ...')
+       
+    # process   = psutil.Process(os.getpid())
+    # RAM_usage = process.memory_info().rss/1024**3 # unit in GBs
+    # print('Memory usage: %.2f GB'%RAM_usage            )   
+        
     # calculate data_rec
-    data_rec = np.real(np.dot(phi_tilda, A_tilda).T)
+    if method == 'fast':
+        data_rec = np.real(np.dot(phi_tilda, A_tilda).T)
+    elif method == 'lowRAM':
+        data_rec = np.real(np.dot(h5f['phi_tilda'], A_tilda).T)
+        
+    # process   = psutil.Process(os.getpid())
+    # RAM_usage = process.memory_info().rss/1024**3 # unit in GBs
+    # print('Memory usage: %.2f GB'%RAM_usage            )   
+        
+    # memory usage
+    process   = psutil.Process(os.getpid())
+    RAM_usage = process.memory_info().rss/1024**3 # unit in GBs
+    
+    time_end=time.time()
+    print('--------------------------------------'     )
+    print('Time-method reconstruction finished'        )
+    print('Memory usage: %.2f GB'%RAM_usage            )
+    print('Run time    : %.2f s'%(time_end-time_start) )
+    print('--------------------------------------'     )
                 
     return data_rec
 
@@ -486,7 +606,7 @@ def reconstruct_frequency_method(x,f,P,Ms,fs,window='default',weight='default',
     nt = x.shape[0]
     nx = x.shape[1]    
     [weight, window, nOvlp, nDFT, nBlks] = spod_parser(nt, nx, window=window, \
-             weight=weight, nOvlp=nOvlp,nDFT=nDFT, method='lowRAM')
+             weight=weight, nOvlp=nOvlp, nDFT=nDFT, method='lowRAM')
 
     # initialize reconstructed flow field data
     nt_rec = nBlks*nDFT-nOvlp*(nBlks-1)

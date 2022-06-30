@@ -58,10 +58,10 @@ h5f  = h5py.File(os.path.join(data_path,'compDDES.h5'),'r')
 data = h5f['data'][:]        # flow fields
 grid = h5f['grid'][:]        # grid points
 dt   = h5f['dt'][0]          # unit in seconds
-ng   = np.int(grid.shape[0]) # number of grid point
+ng   = int(grid.shape[0]) # number of grid point
 nt   = data.shape[0]         # number of snap shot
 nx   = data.shape[1]         # number of grid point * number of variable
-nvar = np.int(nx/ng)         # number of variables
+nvar = int(nx/ng)         # number of variables
 BPF  = 1100/60*17            # blade passing frequency = shaft speed * number of blade
 SS_idxs = h5f['SS_idxs'][:]  # min/max index of blade suction surface
 PS_idxs = h5f['PS_idxs'][:]  # min/max index of blade pressure surface

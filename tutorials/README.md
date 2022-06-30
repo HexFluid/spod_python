@@ -14,8 +14,8 @@ The round jet is a fundamental flow case featuring shear-layer instabilities. It
 
 <figure>
 <p align="left">
-    <img alt="jet_schematics" src="../docs/figs/jet_schematic.png" height="150" align="center" />
-    <img alt="jet_p_ani" src="jet_data/singlevar_results/ori_p_anim.gif" height="250" align="center" />
+    <img alt="jet_schematics" src="../docs/figs/jet_schematic.png" height="150" />
+    <img alt="jet_p_ani" src="jet_data/singlevar_results/ori_p_anim.gif" height="250" />
     <figcaption align="left"> (left): flow schematics; (right): animation of pressure fluctuation </figcaption>
 </p>
 </figure>
@@ -40,8 +40,8 @@ The backward-facing step flow is composed of an attached region, a separated reg
 
 <figure>
 <p align="left">
-    <img alt="bstep_schematics" src="../docs/figs/bstep_schematic.png" height="170" align="center" />
-    <img alt="bstep_p_ani" src="bstep_data/singlevar_results/ori_p_anim.gif" height="250" align="center" />
+    <img alt="bstep_schematics" src="../docs/figs/bstep_schematic.png" height="170" />
+    <img alt="bstep_p_ani" src="bstep_data/singlevar_results/ori_p_anim.gif" height="250" />
     <figcaption align="left"> (left): flow schematics; (right): animation of pressure fluctuation </figcaption>
 </p>
 </figure>
@@ -70,8 +70,8 @@ Compressor blade surfaces experience unsteady blade forces due to the impingemen
 
 <figure>
 <p align="left">
-    <img alt="comp_schematics" src="../docs/figs/comp_schematic.png" height="180" align="center" />
-    <img alt="comp_TLF" src="../docs/figs/comp_TLF.gif" height="150" align="center" />
+    <img alt="comp_schematics" src="../docs/figs/comp_schematic.png" height="180" />
+    <img alt="comp_TLF" src="../docs/figs/comp_TLF.gif" height="150" />
     <figcaption align="left"> (left): flow schematics; (right): animation of vortex structures indicated by the iso-surface of Q-criterion </figcaption>
 </p>
 </figure>
